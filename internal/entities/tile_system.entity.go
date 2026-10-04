@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 
+	"github.com/MarcelArt/tile-system/internal/data"
 	"github.com/MarcelArt/tile-system/pkg/array2d"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -13,7 +14,7 @@ import (
 type TileSystem struct {
 	TileSize int32
 	Offset   rl.Vector2
-	Tiles    array2d.Array2D[*Tile]
+	Tiles    array2d.Array2D[*data.Tile]
 }
 
 type TileSystemOption func(*TileSystem)
@@ -22,7 +23,7 @@ func NewTileSystem(opts ...TileSystemOption) *TileSystem {
 	e := &TileSystem{
 		TileSize: 32,
 		Offset:   rl.NewVector2(0, 0),
-		Tiles:    array2d.New[*Tile](8, 8),
+		Tiles:    array2d.New[*data.Tile](8, 8),
 	}
 
 	for _, opt := range opts {
@@ -40,7 +41,7 @@ func WithTileSize(tileSize int32) TileSystemOption {
 
 func WithWidthAndHeight(width, height int32) TileSystemOption {
 	return func(ts *TileSystem) {
-		ts.Tiles = array2d.New[*Tile](int32(width), int32(height))
+		ts.Tiles = array2d.New[*data.Tile](int32(width), int32(height))
 	}
 }
 
@@ -61,7 +62,7 @@ func (e *TileSystem) Generate() {
 	for x := range e.Tiles.GetW() {
 		for y := range e.Tiles.GetH() {
 			rng := rl.GetRandomValue(0, 3)
-			tile := &Tile{
+			tile := &data.Tile{
 				Temperature: 20.0,
 				Mass:        500.0,
 				Variant:     TileVariant(rng),
@@ -98,11 +99,6 @@ func (e *TileSystem) TileToWorldPoint(x, y int32) (int32, int32) {
 }
 
 func (e *TileSystem) WorldToTileCoord(pos rl.Vector2) (int32, int32) {
-	// offsetX := int32(e.Offset.X) * e.TileSize
-	// offsetY := int32(e.Offset.Y) * e.TileSize
-	// pos.X += float32(offsetX)
-	// pos.Y += float32(offsetY)
-
 	x := float64(pos.X / float32(e.TileSize))
 	x = math.Floor(x)
 
@@ -137,29 +133,3 @@ func (e *TileSystem) debugTile() {
 }
 
 // End of TileSystem
-
-// Tile
-type TileVariant uint
-
-const (
-	TileVacuum TileVariant = iota
-	TileDirt
-	TileSandstone
-	TileCopperOre
-)
-
-var tileVariants = map[TileVariant]string{
-	TileVacuum:    "Vacuum",
-	TileDirt:      "Dirt",
-	TileSandstone: "Sandstone",
-	TileCopperOre: "Copper Ore",
-}
-
-type Tile struct {
-	Temperature float32
-	Mass        float32
-	Variant     TileVariant
-	Color       rl.Color
-}
-
-// End of Tile
