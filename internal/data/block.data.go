@@ -20,6 +20,9 @@ const (
 	BlockDirt
 	BlockSandstone
 	BlockCopperOre
+
+	// Always put on last, only used for rng max value exclusivity
+	BlockIDLength
 )
 
 var Blocks = map[BlockID]*Block{

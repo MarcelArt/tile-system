@@ -7,6 +7,7 @@ import (
 
 	"github.com/MarcelArt/tile-system/internal/data"
 	"github.com/MarcelArt/tile-system/pkg/array2d"
+	"github.com/MarcelArt/tile-system/pkg/rng"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -52,14 +53,19 @@ func WithOffset(offset rl.Vector2) TileSystemOption {
 }
 
 func (e *TileGrid) Generate() {
-	for x := range e.Tiles.GetW() {
-		for y := range e.Tiles.GetH() {
-			rng := rl.GetRandomValue(0, 3)
+	w := e.Tiles.GetW()
+	h := e.Tiles.GetH()
+
+	for x := range w {
+		for y := range h {
+			blockRNG := rng.Int32(0, int32(data.BlockIDLength))
+			tempRNG := rng.Float32(20, 30)
+			massRNG := rng.Float32(200, 600)
 			tile := &data.Tile{
-				Temperature: 20.0,
-				Mass:        500.0,
-				Block:       data.Blocks[data.BlockID(rng)],
-				Color:       data.BlockColors[data.BlockID(rng)],
+				Temperature: tempRNG,
+				Mass:        massRNG,
+				Block:       data.Blocks[data.BlockID(blockRNG)],
+				Color:       data.BlockColors[data.BlockID(blockRNG)],
 			}
 			e.Tiles.Set(x, y, tile)
 		}
@@ -99,6 +105,22 @@ func (e *TileGrid) WorldToTileCoord(pos rl.Vector2) (int32, int32) {
 	y = math.Floor(y)
 
 	return int32(x) - int32(e.Offset.X), int32(y) - int32(e.Offset.Y)
+}
+
+func (e *TileGrid) heatTransfer(dt float32) {
+	w := e.Tiles.GetW()
+	h := e.Tiles.GetH()
+
+	for x := range w {
+		for y := range h {
+			if x+1 < w {
+
+			}
+			if y+1 < h {
+
+			}
+		}
+	}
 }
 
 func (e *TileGrid) debugTile() {
