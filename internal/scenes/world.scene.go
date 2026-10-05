@@ -9,7 +9,7 @@ import (
 const World = "world"
 
 type WorldScene struct {
-	tileSystem *entities.TileSystem
+	tileGrid *entities.TileGrid
 }
 
 func NewWorldScene() *WorldScene {
@@ -21,14 +21,14 @@ func NewWorldScene() *WorldScene {
 	tileSystem.Generate()
 
 	return &WorldScene{
-		tileSystem: tileSystem,
+		tileGrid: tileSystem,
 	}
 }
 
 // Draw implements [engine.IScene].
 func (s *WorldScene) Draw() {
 	rl.ClearBackground(rl.Black)
-	s.tileSystem.Draw()
+	s.tileGrid.Draw()
 }
 
 // GetID implements [engine.IScene].
@@ -41,7 +41,7 @@ func (s *WorldScene) Update() engine.SceneResult {
 	var result engine.SceneResult
 
 	dt := rl.GetFrameTime()
-	s.tileSystem.Update(dt)
+	s.tileGrid.Update(dt)
 
 	return result
 }

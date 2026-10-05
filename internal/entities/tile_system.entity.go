@@ -10,17 +10,17 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-// TileSystem
-type TileSystem struct {
+// TileGrid
+type TileGrid struct {
 	TileSize int32
 	Offset   rl.Vector2
 	Tiles    array2d.Array2D[*data.Tile]
 }
 
-type TileSystemOption func(*TileSystem)
+type TileSystemOption func(*TileGrid)
 
-func NewTileSystem(opts ...TileSystemOption) *TileSystem {
-	e := &TileSystem{
+func NewTileSystem(opts ...TileSystemOption) *TileGrid {
+	e := &TileGrid{
 		TileSize: 32,
 		Offset:   rl.NewVector2(0, 0),
 		Tiles:    array2d.New[*data.Tile](8, 8),
@@ -34,46 +34,39 @@ func NewTileSystem(opts ...TileSystemOption) *TileSystem {
 }
 
 func WithTileSize(tileSize int32) TileSystemOption {
-	return func(ts *TileSystem) {
+	return func(ts *TileGrid) {
 		ts.TileSize = tileSize
 	}
 }
 
 func WithWidthAndHeight(width, height int32) TileSystemOption {
-	return func(ts *TileSystem) {
+	return func(ts *TileGrid) {
 		ts.Tiles = array2d.New[*data.Tile](int32(width), int32(height))
 	}
 }
 
 func WithOffset(offset rl.Vector2) TileSystemOption {
-	return func(ts *TileSystem) {
+	return func(ts *TileGrid) {
 		ts.Offset = offset
 	}
 }
 
-func (e *TileSystem) Generate() {
-	tileColors := map[TileVariant]rl.Color{
-		TileVacuum:    rl.NewColor(0, 0, 0, 255),       // Black color for vacuum
-		TileDirt:      rl.NewColor(139, 69, 19, 255),   // Brown color for dirt
-		TileSandstone: rl.NewColor(210, 180, 140, 255), // Tan color for sandstone
-		TileCopperOre: rl.NewColor(184, 115, 51, 255),  // Copper color for copper ore
-	}
-
+func (e *TileGrid) Generate() {
 	for x := range e.Tiles.GetW() {
 		for y := range e.Tiles.GetH() {
 			rng := rl.GetRandomValue(0, 3)
 			tile := &data.Tile{
 				Temperature: 20.0,
 				Mass:        500.0,
-				Variant:     TileVariant(rng),
-				Color:       tileColors[TileVariant(rng)],
+				Block:       data.Blocks[data.BlockID(rng)],
+				Color:       data.BlockColors[data.BlockID(rng)],
 			}
 			e.Tiles.Set(x, y, tile)
 		}
 	}
 }
 
-func (e *TileSystem) Draw() {
+func (e *TileGrid) Draw() {
 	width := e.Tiles.GetW()
 	height := e.Tiles.GetH()
 	offsetX, offsetY := e.TileToWorldPoint(int32(e.Offset.X), int32(e.Offset.Y))
@@ -90,15 +83,15 @@ func (e *TileSystem) Draw() {
 	}
 }
 
-func (e *TileSystem) Update(dt float32) {
+func (e *TileGrid) Update(dt float32) {
 	e.debugTile()
 }
 
-func (e *TileSystem) TileToWorldPoint(x, y int32) (int32, int32) {
+func (e *TileGrid) TileToWorldPoint(x, y int32) (int32, int32) {
 	return x * e.TileSize, y * e.TileSize
 }
 
-func (e *TileSystem) WorldToTileCoord(pos rl.Vector2) (int32, int32) {
+func (e *TileGrid) WorldToTileCoord(pos rl.Vector2) (int32, int32) {
 	x := float64(pos.X / float32(e.TileSize))
 	x = math.Floor(x)
 
@@ -108,7 +101,7 @@ func (e *TileSystem) WorldToTileCoord(pos rl.Vector2) (int32, int32) {
 	return int32(x) - int32(e.Offset.X), int32(y) - int32(e.Offset.Y)
 }
 
-func (e *TileSystem) debugTile() {
+func (e *TileGrid) debugTile() {
 	mousePos := rl.GetMousePosition()
 
 	x, y := e.WorldToTileCoord(mousePos)
@@ -124,7 +117,7 @@ func (e *TileSystem) debugTile() {
 	}
 
 	fmt.Println("===============================================")
-	fmt.Printf("Tile		: %s\n", tileVariants[tile.Variant])
+	fmt.Printf("Block		: %s\n", tile.Block.Name)
 	fmt.Printf("Mass		: %f\n", tile.Mass)
 	fmt.Printf("Temperature	: %f\n", tile.Temperature)
 	fmt.Printf("Mouse Pos	: (%d, %d)\n", x, y)
