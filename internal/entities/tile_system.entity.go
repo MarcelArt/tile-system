@@ -11,20 +11,27 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+const defaultSimStep = 0.2
+
 // TileGrid
 type TileGrid struct {
-	TileSize int32
 	Offset   rl.Vector2
 	Tiles    array2d.Array2D[*data.Tile]
+	SimStep  float32
+	TileSize int32
+
+	simStepCounter float32
 }
 
 type TileSystemOption func(*TileGrid)
 
 func NewTileSystem(opts ...TileSystemOption) *TileGrid {
 	e := &TileGrid{
-		TileSize: 32,
-		Offset:   rl.NewVector2(0, 0),
-		Tiles:    array2d.New[*data.Tile](8, 8),
+		TileSize:       32,
+		Offset:         rl.NewVector2(0, 0),
+		Tiles:          array2d.New[*data.Tile](8, 8),
+		SimStep:        defaultSimStep,
+		simStepCounter: 0,
 	}
 
 	for _, opt := range opts {
@@ -52,20 +59,32 @@ func WithOffset(offset rl.Vector2) TileSystemOption {
 	}
 }
 
+func WithSimStep(simStep float32) TileSystemOption {
+	return func(tg *TileGrid) {
+		tg.SimStep = simStep
+	}
+}
+
 func (e *TileGrid) Generate() {
 	w := e.Tiles.GetW()
 	h := e.Tiles.GetH()
 
 	for x := range w {
 		for y := range h {
-			blockRNG := rng.Int32(0, int32(data.BlockIDLength))
-			tempRNG := rng.Float32(20, 30)
-			massRNG := rng.Float32(200, 600)
+			blockID := rng.Int32(0, int32(data.BlockIDLength))
+			temp := rng.Float32(20, 30)
+			mass := rng.Float32(200, 600)
+
+			if blockID == int32(data.BlockVacuum) {
+				temp = -273
+				mass = 0
+			}
+
 			tile := &data.Tile{
-				Temperature: tempRNG,
-				Mass:        massRNG,
-				Block:       data.Blocks[data.BlockID(blockRNG)],
-				Color:       data.BlockColors[data.BlockID(blockRNG)],
+				Temperature: temp,
+				Mass:        mass,
+				Block:       data.Blocks[data.BlockID(blockID)],
+				Color:       data.BlockColors[data.BlockID(blockID)],
 			}
 			e.Tiles.Set(x, y, tile)
 		}
@@ -90,6 +109,12 @@ func (e *TileGrid) Draw() {
 }
 
 func (e *TileGrid) Update(dt float32) {
+	if e.simStepCounter >= e.SimStep {
+		e.heatTransfer(dt)
+		e.simStepCounter = 0
+	}
+	e.simStepCounter += dt
+
 	e.debugTile()
 }
 
@@ -114,13 +139,51 @@ func (e *TileGrid) heatTransfer(dt float32) {
 	for x := range w {
 		for y := range h {
 			if x+1 < w {
-
+				e.exchangeHeat(x, y, x+1, y, dt)
 			}
 			if y+1 < h {
-
+				e.exchangeHeat(x, y, x, y+1, dt)
 			}
 		}
 	}
+}
+
+func (e *TileGrid) exchangeHeat(x1, y1, x2, y2 int32, dt float32) {
+	current, err1 := e.Tiles.Get(x1, y1)
+	neighbour, err2 := e.Tiles.Get(x2, y2)
+	if err1 != nil || err2 != nil {
+		return
+	}
+
+	if !e.canTransferHeat(current) || !e.canTransferHeat(neighbour) {
+		return
+	}
+
+	deltaT := current.Temperature - neighbour.Temperature
+	if deltaT == 0 {
+		return
+	}
+
+	hot, cold := current, neighbour
+	if deltaT < 0 {
+		hot, cold = neighbour, current
+		deltaT = -deltaT
+	}
+
+	k := math.Sqrt(float64(hot.Block.ThermalConductivity) * float64(cold.Block.ThermalConductivity))
+	cHot := hot.Mass * hot.Block.SpecificHeatCapacity
+	cCold := cold.Mass * cold.Block.SpecificHeatCapacity
+
+	q := deltaT * dt * float32(k) * 1
+	qMax := deltaT * (cHot * cCold) / (cHot + cCold)
+	q = min(q, qMax)
+
+	hot.Temperature -= q / cHot
+	cold.Temperature += q / cCold
+}
+
+func (e *TileGrid) canTransferHeat(tile *data.Tile) bool {
+	return tile.Block.SpecificHeatCapacity > 0 && tile.Block.ThermalConductivity > 0 && tile.Mass > 0
 }
 
 func (e *TileGrid) debugTile() {

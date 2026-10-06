@@ -17,6 +17,7 @@ func NewWorldScene() *WorldScene {
 		entities.WithOffset(rl.NewVector2(4, 4)),
 		entities.WithTileSize(32),
 		entities.WithWidthAndHeight(8, 8),
+		entities.WithSimStep(0.2),
 	)
 	tileSystem.Generate()
 
