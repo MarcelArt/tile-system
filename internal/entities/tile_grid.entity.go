@@ -11,27 +11,20 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-const defaultSimStep = 0.2
-
 // TileGrid
 type TileGrid struct {
 	Offset   rl.Vector2
 	Tiles    array2d.Array2D[*data.Tile]
-	SimStep  float32
 	TileSize int32
-
-	simStepCounter float32
 }
 
 type TileSystemOption func(*TileGrid)
 
 func NewTileSystem(opts ...TileSystemOption) *TileGrid {
 	e := &TileGrid{
-		TileSize:       32,
-		Offset:         rl.NewVector2(0, 0),
-		Tiles:          array2d.New[*data.Tile](8, 8),
-		SimStep:        defaultSimStep,
-		simStepCounter: 0,
+		TileSize: 32,
+		Offset:   rl.NewVector2(0, 0),
+		Tiles:    array2d.New[*data.Tile](8, 8),
 	}
 
 	for _, opt := range opts {
@@ -56,12 +49,6 @@ func WithWidthAndHeight(width, height int32) TileSystemOption {
 func WithOffset(offset rl.Vector2) TileSystemOption {
 	return func(ts *TileGrid) {
 		ts.Offset = offset
-	}
-}
-
-func WithSimStep(simStep float32) TileSystemOption {
-	return func(tg *TileGrid) {
-		tg.SimStep = simStep
 	}
 }
 
@@ -109,13 +96,11 @@ func (e *TileGrid) Draw() {
 }
 
 func (e *TileGrid) Update(dt float32) {
-	if e.simStepCounter >= e.SimStep {
-		e.heatTransfer(dt)
-		e.simStepCounter = 0
-	}
-	e.simStepCounter += dt
-
 	e.debugTile()
+}
+
+func (e *TileGrid) SimUpdate(dt float32) {
+	e.heatTransfer(dt)
 }
 
 func (e *TileGrid) TileToWorldPoint(x, y int32) (int32, int32) {
