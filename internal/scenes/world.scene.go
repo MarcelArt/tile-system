@@ -20,9 +20,9 @@ type WorldScene struct {
 
 func NewWorldScene() *WorldScene {
 	tileSystem := entities.NewTileSystem(
-		entities.WithOffset(rl.NewVector2(4, 4)),
+		// entities.WithOffset(rl.NewVector2(4, 4)),
 		entities.WithTileSize(32),
-		entities.WithWidthAndHeight(8, 8),
+		entities.WithWidthAndHeight(60, 44),
 	)
 	tileSystem.Generate()
 

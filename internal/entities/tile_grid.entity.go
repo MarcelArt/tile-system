@@ -7,8 +7,12 @@ import (
 
 	"github.com/MarcelArt/tile-system/internal/data"
 	"github.com/MarcelArt/tile-system/pkg/array2d"
-	"github.com/MarcelArt/tile-system/pkg/rng"
+	"github.com/aquilax/go-perlin"
 	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+const (
+	defaultSeed = 123
 )
 
 // TileGrid
@@ -16,6 +20,9 @@ type TileGrid struct {
 	Offset   rl.Vector2
 	Tiles    array2d.Array2D[*data.Tile]
 	TileSize int32
+
+	seed int64
+	p    *perlin.Perlin
 }
 
 type TileSystemOption func(*TileGrid)
@@ -25,57 +32,68 @@ func NewTileSystem(opts ...TileSystemOption) *TileGrid {
 		TileSize: 32,
 		Offset:   rl.NewVector2(0, 0),
 		Tiles:    array2d.New[*data.Tile](8, 8),
+		seed:     defaultSeed,
 	}
 
 	for _, opt := range opts {
 		opt(e)
 	}
 
+	e.p = perlin.NewPerlin(2, 2, 3, e.seed)
+
 	return e
 }
 
 func WithTileSize(tileSize int32) TileSystemOption {
-	return func(ts *TileGrid) {
-		ts.TileSize = tileSize
+	return func(tg *TileGrid) {
+		tg.TileSize = tileSize
 	}
 }
 
 func WithWidthAndHeight(width, height int32) TileSystemOption {
-	return func(ts *TileGrid) {
-		ts.Tiles = array2d.New[*data.Tile](int32(width), int32(height))
+	return func(tg *TileGrid) {
+		tg.Tiles = array2d.New[*data.Tile](int32(width), int32(height))
 	}
 }
 
 func WithOffset(offset rl.Vector2) TileSystemOption {
-	return func(ts *TileGrid) {
-		ts.Offset = offset
+	return func(tg *TileGrid) {
+		tg.Offset = offset
+	}
+}
+
+func WithSeed(seed int64) TileSystemOption {
+	return func(tg *TileGrid) {
+		tg.seed = seed
 	}
 }
 
 func (e *TileGrid) Generate() {
-	w := e.Tiles.GetW()
-	h := e.Tiles.GetH()
+	e.fillWithVacuum()
+	e.surfaceGeneration()
 
-	for x := range w {
-		for y := range h {
-			blockID := rng.Int32(0, int32(data.BlockIDLength))
-			temp := rng.Float32(20, 30)
-			mass := rng.Float32(200, 600)
+	// w := e.Tiles.GetW()
+	// h := e.Tiles.GetH()
 
-			if blockID == int32(data.BlockVacuum) {
-				temp = -273
-				mass = 0
-			}
+	// for x := range w {
+	// 	for y := range h {
+	// 		blockID := rng.Int32(0, int32(data.BlockIDLength))
+	// 		temp := rng.Float32(20, 30)
+	// 		mass := rng.Float32(200, 600)
 
-			tile := &data.Tile{
-				Temperature: temp,
-				Mass:        mass,
-				Block:       data.Blocks[data.BlockID(blockID)],
-				Color:       data.BlockColors[data.BlockID(blockID)],
-			}
-			e.Tiles.Set(x, y, tile)
-		}
-	}
+	// 		if blockID == int32(data.BlockVacuum) {
+	// 			temp = -273
+	// 			mass = 0
+	// 		}
+
+	// 		tile := &data.Tile{
+	// 			Temperature: temp,
+	// 			Mass:        mass,
+	// 			Block:       data.Blocks[data.BlockID(blockID)],
+	// 		}
+	// 		e.Tiles.Set(x, y, tile)
+	// 	}
+	// }
 }
 
 func (e *TileGrid) Draw() {
@@ -90,13 +108,13 @@ func (e *TileGrid) Draw() {
 				continue
 			}
 			worldX, worldY := e.TileToWorldPoint(int32(x), int32(y))
-			rl.DrawRectangle(worldX+offsetX, worldY+offsetY, e.TileSize, e.TileSize, tile.Color)
+			rl.DrawRectangle(worldX+offsetX, worldY+offsetY, e.TileSize, e.TileSize, tile.Block.Color)
 		}
 	}
 }
 
 func (e *TileGrid) Update(dt float32) {
-	e.debugTile()
+	// e.debugTile()
 }
 
 func (e *TileGrid) SimUpdate(dt float32) {
@@ -169,6 +187,38 @@ func (e *TileGrid) exchangeHeat(x1, y1, x2, y2 int32, dt float32) {
 
 func (e *TileGrid) canTransferHeat(tile *data.Tile) bool {
 	return tile.Block.SpecificHeatCapacity > 0 && tile.Block.ThermalConductivity > 0 && tile.Mass > 0
+}
+
+func (e *TileGrid) surfaceGeneration() {
+	log.Println("Generating surface")
+	w := e.Tiles.GetW()
+	for x := range w {
+		y := e.p.Noise1D(float64(x) * 0.25)
+		log.Println("Perlin y:", y)
+		y = math.Round(y)
+
+		tile := &data.Tile{
+			Temperature: 20,
+			Mass:        200,
+			Block:       data.Blocks[data.BlockSandstone],
+		}
+		e.Tiles.Set(x, int32(y), tile)
+	}
+}
+
+func (e *TileGrid) fillWithVacuum() {
+	log.Println("Filling world with vacuum")
+	w, h := e.Tiles.GetW(), e.Tiles.GetH()
+	for x := range w {
+		for y := range h {
+			tile := &data.Tile{
+				Temperature: -273,
+				Mass:        0,
+				Block:       data.Blocks[data.BlockVacuum],
+			}
+			e.Tiles.Set(x, int32(y), tile)
+		}
+	}
 }
 
 func (e *TileGrid) debugTile() {
