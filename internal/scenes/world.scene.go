@@ -22,7 +22,7 @@ func NewWorldScene() *WorldScene {
 	tileSystem := entities.NewTileSystem(
 		// entities.WithOffset(rl.NewVector2(4, 4)),
 		entities.WithTileSize(32),
-		entities.WithWidthAndHeight(60, 44),
+		entities.WithWidthAndHeight(60, 23),
 	)
 	tileSystem.Generate()
 

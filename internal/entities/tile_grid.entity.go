@@ -191,18 +191,39 @@ func (e *TileGrid) canTransferHeat(tile *data.Tile) bool {
 
 func (e *TileGrid) surfaceGeneration() {
 	log.Println("Generating surface")
+
 	w := e.Tiles.GetW()
+	h := e.Tiles.GetH()
+
+	baseY := h / 2
+	maxStep := 1
+	frequency := 0.1
+
+	prevY := baseY
 	for x := range w {
-		y := e.p.Noise1D(float64(x) * 0.25)
-		log.Println("Perlin y:", y)
-		y = math.Round(y)
+		var y int32
+		if x == 0 {
+			y = baseY
+		} else {
+			n := e.p.Noise1D(float64(x) * frequency)
+			desired := int32(math.Round((n + 1) / 2 * float64(h-1)))
+
+			delta := rl.Clamp(float32(desired)-float32(prevY), -float32(maxStep), float32(maxStep))
+			y = int32(rl.Clamp(float32(prevY)+delta, 0, float32(h-1)))
+		}
 
 		tile := &data.Tile{
 			Temperature: 20,
 			Mass:        200,
 			Block:       data.Blocks[data.BlockSandstone],
 		}
-		e.Tiles.Set(x, int32(y), tile)
+
+		i := y
+		for i < h {
+			e.Tiles.Set(x, int32(i), tile)
+			i++
+		}
+		prevY = y
 	}
 }
 
