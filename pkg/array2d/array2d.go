@@ -51,3 +51,15 @@ func (a Array2D[T]) GetW() int32 {
 func (a Array2D[T]) GetH() int32 {
 	return a.h
 }
+
+func (a *Array2D[T]) Fill(value T) error {
+	for x := range a.w {
+		for y := range a.h {
+			if err := a.Set(x, y, value); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}

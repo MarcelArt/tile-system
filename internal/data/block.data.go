@@ -6,7 +6,9 @@ import (
 )
 
 type Block struct {
-	_                    no.Copy
+	_ no.Copy
+
+	ID                   BlockID
 	Name                 string
 	ThermalConductivity  float32
 	SpecificHeatCapacity float32
@@ -28,6 +30,7 @@ const (
 
 var Blocks = map[BlockID]*Block{
 	BlockVacuum: {
+		ID:                   BlockVacuum,
 		Name:                 "Vacuum",
 		ThermalConductivity:  0,
 		SpecificHeatCapacity: 0,
@@ -35,6 +38,7 @@ var Blocks = map[BlockID]*Block{
 		Color:                rl.NewColor(0, 0, 0, 255),
 	},
 	BlockDirt: {
+		ID:                   BlockDirt,
 		Name:                 "Dirt",
 		ThermalConductivity:  2,
 		SpecificHeatCapacity: 1.48,
@@ -42,6 +46,7 @@ var Blocks = map[BlockID]*Block{
 		Color:                rl.NewColor(139, 69, 19, 255),
 	},
 	BlockSandstone: {
+		ID:                   BlockSandstone,
 		Name:                 "Sandstone",
 		ThermalConductivity:  2.9,
 		SpecificHeatCapacity: 0.8,
@@ -49,6 +54,7 @@ var Blocks = map[BlockID]*Block{
 		Color:                rl.NewColor(210, 180, 140, 255),
 	},
 	BlockCopperOre: {
+		ID:                   BlockCopperOre,
 		Name:                 "Copper Ore",
 		ThermalConductivity:  4.5,
 		SpecificHeatCapacity: 0.386,

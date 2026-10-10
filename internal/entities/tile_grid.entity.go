@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	defaultSeed = 123
+	defaultSeed   = 123
+	oreSeedOffset = 101
 )
 
 // TileGrid
@@ -71,6 +72,7 @@ func WithSeed(seed int64) TileSystemOption {
 func (e *TileGrid) Generate() {
 	e.fillWithVacuum()
 	e.surfaceGeneration()
+	e.oreGeneration()
 
 	// w := e.Tiles.GetW()
 	// h := e.Tiles.GetH()
@@ -114,7 +116,7 @@ func (e *TileGrid) Draw() {
 }
 
 func (e *TileGrid) Update(dt float32) {
-	// e.debugTile()
+	e.debugTile()
 }
 
 func (e *TileGrid) SimUpdate(dt float32) {
@@ -212,14 +214,13 @@ func (e *TileGrid) surfaceGeneration() {
 			y = int32(rl.Clamp(float32(prevY)+delta, 0, float32(h-1)))
 		}
 
-		tile := &data.Tile{
-			Temperature: 20,
-			Mass:        200,
-			Block:       data.Blocks[data.BlockSandstone],
-		}
-
 		i := y
 		for i < h {
+			tile := &data.Tile{
+				Temperature: 20,
+				Mass:        200,
+				Block:       data.Blocks[data.BlockSandstone],
+			}
 			e.Tiles.Set(x, int32(i), tile)
 			i++
 		}
@@ -238,6 +239,29 @@ func (e *TileGrid) fillWithVacuum() {
 				Block:       data.Blocks[data.BlockVacuum],
 			}
 			e.Tiles.Set(x, int32(y), tile)
+		}
+	}
+}
+
+func (e *TileGrid) oreGeneration() {
+	log.Println("Placing ores")
+	oreNoise := perlin.NewPerlin(2, 2, 2, e.seed+oreSeedOffset)
+	w, h := e.Tiles.GetW(), e.Tiles.GetH()
+
+	for x := range w {
+		for y := range h {
+			tile, err := e.Tiles.Get(x, y)
+			if err != nil || tile.Block.ID == data.BlockVacuum {
+				continue
+			}
+
+			n := oreNoise.Noise2D(float64(x)*0.25, float64(y)*0.25)
+
+			// can deduct threshold based on y axis to spawn more on lower area
+			threshold := 0.2
+			if n > threshold {
+				tile.Block = data.Blocks[data.BlockCopperOre]
+			}
 		}
 	}
 }

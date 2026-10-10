@@ -11,11 +11,13 @@ import (
 const (
 	World           = "world"
 	defaultTickRate = 0.2
+	cameraSpeed     = 40
 )
 
 type WorldScene struct {
 	tileGrid    *entities.TileGrid
 	tickCounter float32
+	camera      rl.Camera2D
 }
 
 func NewWorldScene() *WorldScene {
@@ -26,17 +28,30 @@ func NewWorldScene() *WorldScene {
 	)
 	tileSystem.Generate()
 
+	screenWidth := rl.GetScreenWidth()
+	screenHeight := rl.GetScreenHeight()
+
 	return &WorldScene{
 		tileGrid:    tileSystem,
 		tickCounter: 0,
+		camera: rl.NewCamera2D(
+			rl.NewVector2(float32(screenWidth)/2, float32(screenHeight)/2),
+			rl.Vector2Zero(),
+			0,
+			1,
+		),
 	}
 }
 
 // Draw implements [engine.IScene].
 func (s *WorldScene) Draw() {
 	rl.ClearBackground(rl.Black)
+	rl.BeginMode2D(s.camera)
+
 	s.tileGrid.Draw()
 	s.drawTileTooltip()
+
+	rl.EndMode2D()
 }
 
 // GetID implements [engine.IScene].
@@ -50,6 +65,7 @@ func (s *WorldScene) Update() engine.SceneResult {
 
 	dt := rl.GetFrameTime()
 	s.tileGrid.Update(dt)
+	s.moveCamera(dt)
 
 	if s.tickCounter >= defaultTickRate {
 		s.SimUpdate(dt)
@@ -109,6 +125,21 @@ func (s *WorldScene) drawTileTooltip() {
 	for i, line := range lines {
 		lineY := tooltipY + padding + int32(i)*(fontSize+lineSpacing)
 		rl.DrawText(line, tooltipX+padding, lineY, fontSize, rl.RayWhite)
+	}
+}
+
+func (s *WorldScene) moveCamera(dt float32) {
+	if rl.IsKeyDown(rl.KeyA) {
+		s.camera.Offset.X += cameraSpeed
+	}
+	if rl.IsKeyDown(rl.KeyD) {
+		s.camera.Offset.X -= cameraSpeed
+	}
+	if rl.IsKeyDown(rl.KeyW) {
+		s.camera.Offset.Y += cameraSpeed
+	}
+	if rl.IsKeyDown(rl.KeyS) {
+		s.camera.Offset.Y -= cameraSpeed
 	}
 }
 
