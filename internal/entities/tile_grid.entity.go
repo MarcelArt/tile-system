@@ -16,6 +16,7 @@ const (
 	defaultSeed    = 123
 	oreSeedOffset  = 101
 	caveSeedOffset = 202
+	propSeedOffset = 303
 )
 
 // TileGrid
@@ -79,29 +80,7 @@ func (e *TileGrid) Generate() {
 	e.surfaceGeneration()
 	e.oreGeneration()
 	e.caveGeneration()
-
-	// w := e.Tiles.GetW()
-	// h := e.Tiles.GetH()
-
-	// for x := range w {
-	// 	for y := range h {
-	// 		blockID := rng.Int32(0, int32(data.BlockIDLength))
-	// 		temp := rng.Float32(20, 30)
-	// 		mass := rng.Float32(200, 600)
-
-	// 		if blockID == int32(data.BlockVacuum) {
-	// 			temp = -273
-	// 			mass = 0
-	// 		}
-
-	// 		tile := &data.Tile{
-	// 			Temperature: temp,
-	// 			Mass:        mass,
-	// 			Block:       data.Blocks[data.BlockID(blockID)],
-	// 		}
-	// 		e.Tiles.Set(x, y, tile)
-	// 	}
-	// }
+	e.finalizeProperties()
 }
 
 func (e *TileGrid) Draw() {
@@ -319,6 +298,27 @@ func (e *TileGrid) caveGeneration() {
 			tile.Block = data.Blocks[data.BlockVacuum]
 			tile.Mass = 0
 			tile.Temperature = -273
+		}
+	}
+}
+
+func (e *TileGrid) finalizeProperties() {
+	log.Println("Warming up world")
+	massNoise := perlin.NewPerlin(2, 2, 2, e.seed+propSeedOffset)
+
+	w, h := e.Tiles.GetW(), e.Tiles.GetH()
+	for x := range w {
+		for y := range h {
+			tile, _ := e.Tiles.Get(x, y)
+			if tile.Block.ID == data.BlockVacuum {
+				continue
+			}
+			depth := y - e.surfaceY[x]
+
+			richness := 1 + 0.2*massNoise.Noise2D(float64(x)*0.08, float64(y)*0.08)
+			tile.Mass = tile.Block.BaseMass * float32(richness)
+
+			tile.Temperature = 20 + float32(depth)*1.5
 		}
 	}
 }
