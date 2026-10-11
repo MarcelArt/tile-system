@@ -64,7 +64,7 @@ func (s *WorldScene) Update() engine.SceneResult {
 	var result engine.SceneResult
 
 	dt := rl.GetFrameTime()
-	s.tileGrid.Update(dt)
+	s.tileGrid.Update(dt, s.camera)
 	s.moveCamera(dt)
 
 	if s.tickCounter >= defaultTickRate {
@@ -81,7 +81,7 @@ func (s *WorldScene) SimUpdate(dt float32) {
 }
 
 func (s *WorldScene) drawTileTooltip() {
-	mousePos := rl.GetMousePosition()
+	mousePos := engine.GetWorldMousePosition2D(s.camera)
 	x, y := s.tileGrid.WorldToTileCoord(mousePos)
 
 	tile, err := s.tileGrid.Tiles.Get(x, y)

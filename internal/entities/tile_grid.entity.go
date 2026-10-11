@@ -7,6 +7,7 @@ import (
 
 	"github.com/MarcelArt/tile-system/internal/data"
 	"github.com/MarcelArt/tile-system/pkg/array2d"
+	"github.com/MarcelArt/tile-system/pkg/engine"
 	"github.com/aquilax/go-perlin"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -115,8 +116,8 @@ func (e *TileGrid) Draw() {
 	}
 }
 
-func (e *TileGrid) Update(dt float32) {
-	e.debugTile()
+func (e *TileGrid) Update(dt float32, camera rl.Camera2D) {
+	e.debugTile(camera)
 }
 
 func (e *TileGrid) SimUpdate(dt float32) {
@@ -266,8 +267,8 @@ func (e *TileGrid) oreGeneration() {
 	}
 }
 
-func (e *TileGrid) debugTile() {
-	mousePos := rl.GetMousePosition()
+func (e *TileGrid) debugTile(camera rl.Camera2D) {
+	mousePos := engine.GetWorldMousePosition2D(camera)
 
 	x, y := e.WorldToTileCoord(mousePos)
 
