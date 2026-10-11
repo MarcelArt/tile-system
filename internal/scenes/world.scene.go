@@ -2,6 +2,7 @@ package scenes
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/MarcelArt/tile-system/internal/entities"
 	"github.com/MarcelArt/tile-system/pkg/engine"
@@ -11,7 +12,7 @@ import (
 const (
 	World           = "world"
 	defaultTickRate = 0.2
-	cameraSpeed     = 40
+	cameraSpeed     = 600
 )
 
 type WorldScene struct {
@@ -24,7 +25,7 @@ func NewWorldScene() *WorldScene {
 	tileSystem := entities.NewTileSystem(
 		// entities.WithOffset(rl.NewVector2(4, 4)),
 		entities.WithTileSize(32),
-		entities.WithWidthAndHeight(60, 23),
+		entities.WithWidthAndHeight(64, 44),
 	)
 	tileSystem.Generate()
 
@@ -129,18 +130,29 @@ func (s *WorldScene) drawTileTooltip() {
 }
 
 func (s *WorldScene) moveCamera(dt float32) {
+	log.Println("s.camera.Offset :>> ", s.camera.Offset)
 	if rl.IsKeyDown(rl.KeyA) {
-		s.camera.Offset.X += cameraSpeed
+		s.camera.Offset.X += cameraSpeed * dt
 	}
 	if rl.IsKeyDown(rl.KeyD) {
-		s.camera.Offset.X -= cameraSpeed
+		s.camera.Offset.X -= cameraSpeed * dt
 	}
 	if rl.IsKeyDown(rl.KeyW) {
-		s.camera.Offset.Y += cameraSpeed
+		s.camera.Offset.Y += cameraSpeed * dt
 	}
 	if rl.IsKeyDown(rl.KeyS) {
-		s.camera.Offset.Y -= cameraSpeed
+		s.camera.Offset.Y -= cameraSpeed * dt
 	}
+	s.clampCamera()
+}
+
+func (s *WorldScene) clampCamera() {
+	worldW, worldH := s.tileGrid.WorldPixelSize()
+	screenW := rl.GetScreenWidth()
+	screenH := rl.GetScreenHeight()
+
+	s.camera.Offset.X = rl.Clamp(s.camera.Offset.X, float32(screenW)-worldW, 0)
+	s.camera.Offset.Y = rl.Clamp(s.camera.Offset.Y, float32(screenH)-worldH, 0)
 }
 
 var _ engine.IScene = &WorldScene{}

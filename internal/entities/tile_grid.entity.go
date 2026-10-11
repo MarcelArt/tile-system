@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	defaultSeed   = 123
-	oreSeedOffset = 101
+	defaultSeed    = 123
+	oreSeedOffset  = 101
+	caveSeedOffset = 202
 )
 
 // TileGrid
@@ -23,8 +24,9 @@ type TileGrid struct {
 	Tiles    array2d.Array2D[*data.Tile]
 	TileSize int32
 
-	seed int64
-	p    *perlin.Perlin
+	seed     int64
+	p        *perlin.Perlin
+	surfaceY []int32
 }
 
 type TileSystemOption func(*TileGrid)
@@ -32,9 +34,10 @@ type TileSystemOption func(*TileGrid)
 func NewTileSystem(opts ...TileSystemOption) *TileGrid {
 	e := &TileGrid{
 		TileSize: 32,
-		Offset:   rl.NewVector2(0, 0),
+		Offset:   rl.Vector2Zero(),
 		Tiles:    array2d.New[*data.Tile](8, 8),
 		seed:     defaultSeed,
+		surfaceY: make([]int32, 8),
 	}
 
 	for _, opt := range opts {
@@ -55,6 +58,7 @@ func WithTileSize(tileSize int32) TileSystemOption {
 func WithWidthAndHeight(width, height int32) TileSystemOption {
 	return func(tg *TileGrid) {
 		tg.Tiles = array2d.New[*data.Tile](int32(width), int32(height))
+		tg.surfaceY = make([]int32, width)
 	}
 }
 
@@ -74,6 +78,7 @@ func (e *TileGrid) Generate() {
 	e.fillWithVacuum()
 	e.surfaceGeneration()
 	e.oreGeneration()
+	e.caveGeneration()
 
 	// w := e.Tiles.GetW()
 	// h := e.Tiles.GetH()
@@ -117,7 +122,7 @@ func (e *TileGrid) Draw() {
 }
 
 func (e *TileGrid) Update(dt float32, camera rl.Camera2D) {
-	e.debugTile(camera)
+	// e.debugTile(camera)
 }
 
 func (e *TileGrid) SimUpdate(dt float32) {
@@ -136,6 +141,10 @@ func (e *TileGrid) WorldToTileCoord(pos rl.Vector2) (int32, int32) {
 	y = math.Floor(y)
 
 	return int32(x) - int32(e.Offset.X), int32(y) - int32(e.Offset.Y)
+}
+
+func (e *TileGrid) WorldPixelSize() (float32, float32) {
+	return float32(e.Tiles.GetW() * e.TileSize), float32(e.Tiles.GetH() * e.TileSize)
 }
 
 func (e *TileGrid) heatTransfer(dt float32) {
@@ -215,6 +224,8 @@ func (e *TileGrid) surfaceGeneration() {
 			y = int32(rl.Clamp(float32(prevY)+delta, 0, float32(h-1)))
 		}
 
+		e.surfaceY[x] = y
+
 		i := y
 		for i < h {
 			tile := &data.Tile{
@@ -263,6 +274,51 @@ func (e *TileGrid) oreGeneration() {
 			if n > threshold {
 				tile.Block = data.Blocks[data.BlockCopperOre]
 			}
+		}
+	}
+}
+
+func (e *TileGrid) caveGeneration() {
+	log.Println("Digging some caves")
+	caveNoise := perlin.NewPerlin(2, 2, 2, e.seed+caveSeedOffset)
+	w, h := e.Tiles.GetW(), e.Tiles.GetH()
+
+	mask := array2d.New[bool](w, h)
+	for x := range w {
+		for y := range h {
+			noise := caveNoise.Noise2D(float64(x)*0.12, float64(y)*0.12)
+			isCave := noise > 0.15
+			mask.Set(x, y, isCave)
+		}
+	}
+
+	// for range 4 {
+	// 	next := array2d.New[bool](w, h)
+	// 	for x := range w {
+	// 		for y := range h {
+	// 			next
+	// 		}
+	// 	}
+	// }
+
+	for x := range w {
+		for y := range h {
+			if c, _ := mask.Get(x, y); !c {
+				continue
+			}
+
+			tile, _ := e.Tiles.Get(x, y)
+			if tile.Block.ID == data.BlockVacuum {
+				continue
+			}
+
+			if y-e.surfaceY[x] < 12 {
+				continue
+			}
+
+			tile.Block = data.Blocks[data.BlockVacuum]
+			tile.Mass = 0
+			tile.Temperature = -273
 		}
 	}
 }
