@@ -9,6 +9,8 @@ type Game struct {
 	Width     int32
 	Height    int32
 	TargetFPS int32
+	OnStart   func()
+	OnExit    func()
 
 	scene IScene
 }
@@ -30,12 +32,15 @@ func (g *Game) Start() {
 	rl.InitWindow(g.Width, g.Height, g.Title)
 	defer rl.CloseWindow()
 
+	g.OnStart()
+
 	rl.SetTargetFPS(g.TargetFPS)
 
 	for !rl.WindowShouldClose() {
 		// Scene Update
 		res := g.scene.Update()
 		if res.NextScene != nil && res.NextScene.GetID() != g.scene.GetID() {
+			g.scene.Destroy()
 			g.SetActiveScene(res.NextScene)
 		}
 
@@ -47,4 +52,5 @@ func (g *Game) Start() {
 		rl.DrawFPS(0, 0)
 		rl.EndDrawing()
 	}
+	g.OnExit()
 }

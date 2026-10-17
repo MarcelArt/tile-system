@@ -81,6 +81,10 @@ func (s *WorldScene) SimUpdate(dt float32) {
 	s.tileGrid.SimUpdate(dt)
 }
 
+func (s *WorldScene) Destroy() {
+	s.tileGrid = nil
+}
+
 func (s *WorldScene) drawTileTooltip() {
 	mousePos := engine.GetWorldMousePosition2D(s.camera)
 	x, y := s.tileGrid.WorldToTileCoord(mousePos)

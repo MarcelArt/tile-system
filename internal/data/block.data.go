@@ -17,7 +17,15 @@ type Block struct {
 	BaseMass             float32
 }
 
-type BlockID uint
+func (d *Block) TextureSource() rl.Rectangle {
+	id := d.ID
+	column := id % 2
+	row := id / 2
+
+	return rl.NewRectangle(float32(column)*627, float32(row)*627, 627, 627)
+}
+
+type BlockID = uint
 
 const (
 	BlockVacuum BlockID = iota

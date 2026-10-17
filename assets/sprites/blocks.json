@@ -1,0 +1,45 @@
+{
+  "image": "blocks.png",
+  "width": 1254,
+  "height": 1254,
+  "columns": 2,
+  "rows": 2,
+  "cellWidth": 627,
+  "cellHeight": 627,
+  "margin": 0,
+  "spacing": 0,
+  "frames": [
+    {
+      "blockID": 0,
+      "name": "Vacuum",
+      "x": 0,
+      "y": 0,
+      "width": 627,
+      "height": 627
+    },
+    {
+      "blockID": 1,
+      "name": "Dirt",
+      "x": 627,
+      "y": 0,
+      "width": 627,
+      "height": 627
+    },
+    {
+      "blockID": 2,
+      "name": "Sandstone",
+      "x": 0,
+      "y": 627,
+      "width": 627,
+      "height": 627
+    },
+    {
+      "blockID": 3,
+      "name": "Copper Ore",
+      "x": 627,
+      "y": 627,
+      "width": 627,
+      "height": 627
+    }
+  ]
+}

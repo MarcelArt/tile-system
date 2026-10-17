@@ -1,0 +1,13 @@
+Generated with the built-in image_gen tool.
+Actual output: 1254x1254 pixels, four 627x627 cells. See blocks.json.
+
+Use case: stylized-concept
+Asset type: production 2D terrain block spritesheet for a Go/raylib tile simulation.
+Primary request: Create one square 1024x1024 PNG texture atlas with exactly four equal 512x512 square cells in a strict 2-column by 2-row grid. No margins, gutters, gaps, frames, borders or text. Each texture completely fills its quadrant to its edges.
+Cell order, matching BlockID enumeration:
+Top left (ID 0): Vacuum. Entire quadrant perfectly uniform opaque pure black #000000. No stars, particles or texture.
+Top right (ID 1): Dirt. Rich earth brown based on #8B4513, irregular compacted soil clumps with tiny embedded pebbles and restrained dark crevices.
+Bottom left (ID 2): Sandstone. Warm tan based on #D2B48C, subtle sedimentary horizontal strata, grainy stone clusters, a few fine broken seams.
+Bottom right (ID 3): Copper Ore. Rough earthy rock with abundant irregular metallic copper-orange mineral veins and angular deposits based on #B87333. Copper must clearly differ from dirt, with brighter copper highlights among dark rock.
+Style/medium: cohesive crisp low-resolution pixel art, designed to read as 32x32 game tiles enlarged with nearest-neighbor-like hard square pixel clusters. Flat front-facing orthographic square terrain cross-sections. Restrained palette, strong readable material identities, consistent subtle shading. Each material should visually repeat as a terrain texture without a raised tile edge.
+Constraints: exactly four cells, exact halfway boundaries x=512 and y=512; all cells opaque. No extra tiles, labels, letters, numbers, legends, grid lines, objects, grass, cubes, isometric perspective, bevels, drop shadows, blur, antialiasing or watermark.

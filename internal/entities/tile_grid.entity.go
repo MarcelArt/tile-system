@@ -95,7 +95,8 @@ func (e *TileGrid) Draw() {
 				continue
 			}
 			worldX, worldY := e.TileToWorldPoint(int32(x), int32(y))
-			rl.DrawRectangle(worldX+offsetX, worldY+offsetY, e.TileSize, e.TileSize, tile.Block.Color)
+			// rl.DrawRectangle(worldX+offsetX, worldY+offsetY, e.TileSize, e.TileSize, tile.Block.Color)
+			e.drawTile(tile, float32(worldX+offsetX), float32(worldY+offsetY))
 		}
 	}
 }
@@ -106,6 +107,9 @@ func (e *TileGrid) Update(dt float32, camera rl.Camera2D) {
 
 func (e *TileGrid) SimUpdate(dt float32) {
 	e.heatTransfer(dt)
+}
+
+func (e *TileGrid) Destroy() {
 }
 
 func (e *TileGrid) TileToWorldPoint(x, y int32) (int32, int32) {
@@ -321,6 +325,21 @@ func (e *TileGrid) finalizeProperties() {
 			tile.Temperature = 20 + float32(depth)*1.5
 		}
 	}
+}
+
+func (e *TileGrid) drawTile(tile *data.Tile, posX float32, posY float32) {
+	source := tile.Block.TextureSource()
+
+	destination := rl.NewRectangle(posX, posY, float32(e.TileSize), float32(e.TileSize))
+
+	rl.DrawTexturePro(
+		engine.GetTexture2D("blocks"),
+		source,
+		destination,
+		rl.Vector2Zero(),
+		0,
+		rl.White,
+	)
 }
 
 func (e *TileGrid) debugTile(camera rl.Camera2D) {
