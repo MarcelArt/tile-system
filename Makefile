@@ -4,5 +4,8 @@ go:
 dev:
 	@air
 
-build:
-	@go build -o builds/tile-system main.go
+build-linux:
+	@./build.sh linux
+
+build-win:
+	@./build.sh win
