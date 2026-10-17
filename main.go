@@ -9,9 +9,13 @@ import (
 func main() {
 	g := engine.NewGame("Tile System", 1280, 720, 60)
 	g.OnStart = func() {
-		g.SetActiveScene(scenes.NewWorldScene())
 		blockTexture := engine.SetTexture2D("blocks", "assets/sprites/blocks.png")
 		rl.SetTextureFilter(blockTexture, rl.FilterPoint)
+
+		playerTexture := engine.SetTexture2D("player", "assets/sprites/player-space-idle.png")
+		rl.SetTextureFilter(playerTexture, rl.FilterPoint)
+
+		g.SetActiveScene(scenes.NewWorldScene())
 	}
 	g.OnExit = func() {
 		engine.UnloadAllTexture2D()

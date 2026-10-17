@@ -1,0 +1,10 @@
+Generated using built-in image_gen with player-idle.png as the edit target.
+
+Use case: style-transfer
+Asset type: transparent playable character idle sprite for a 2D space colony sandbox game.
+Input images: Image 1 is the edit target: existing right-facing pixel-art miner.
+Primary request: Recreate this character as an original space colonist suitable for a space survival sandbox in the spirit of Oxygen Not Included. Keep the friendly face, short dark hair, full-body right-facing neutral idle pose, slightly oversized head, crisp square pixel clusters and readable silhouette. Replace the mining hard hat, shirt, overalls and leather gear with a practical sealed space exploration suit: pale ivory pressure suit, dark flexible joints, small copper-orange utility accents, sturdy space boots and gloves, a rounded transparent helmet with the face clearly visible, and a compact oxygen life-support backpack with a short connected hose. Charming resourceful colony worker, not a military soldier. Original design.
+Style/medium: cohesive retro pixel art matching the input's hard square pixel clusters and restrained material shading. Readable at small game scale. Slightly compact cartoon proportions. Flat orthographic side view.
+Composition: exactly one character centered head to toe, right-facing idle, arms relaxed, feet visible, small margins; preserve portrait composition.
+Background: genuinely transparent alpha everywhere outside the character and in gaps between limbs. Completely remove the input's brown haze and dark backdrop. Clean silhouette with no glow, no halo, no atmospheric effects, no floor or shadow.
+Constraints: preserve the original character's facial identity and pixel-art rendering, redesign clothing and headgear for a space sandbox. One pose only, no grid, no extra characters, no labels, logos, text, watermark, backdrop, stars, scenery, weapons or held tools. Avoid smooth painted edges and photorealism.

@@ -2,8 +2,8 @@ package scenes
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/MarcelArt/tile-system/internal/data"
 	"github.com/MarcelArt/tile-system/internal/entities"
 	"github.com/MarcelArt/tile-system/pkg/engine"
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -19,6 +19,7 @@ type WorldScene struct {
 	tileGrid    *entities.TileGrid
 	tickCounter float32
 	camera      rl.Camera2D
+	player      *entities.Player
 }
 
 func NewWorldScene() *WorldScene {
@@ -28,6 +29,19 @@ func NewWorldScene() *WorldScene {
 		entities.WithWidthAndHeight(64, 44),
 	)
 	tileSystem.Generate()
+
+	h := tileSystem.Tiles.GetH()
+	x := tileSystem.Tiles.GetW() / 2
+	var playerPos rl.Vector2
+	for y := range h {
+		tile, _ := tileSystem.Tiles.Get(x, y+2)
+		if tile.Block.ID != data.BlockVacuum {
+			playerX, playerY := tileSystem.TileToWorldPoint(x, y)
+			playerPos.X = float32(playerX)
+			playerPos.Y = float32(playerY)
+			break
+		}
+	}
 
 	screenWidth := rl.GetScreenWidth()
 	screenHeight := rl.GetScreenHeight()
@@ -41,6 +55,9 @@ func NewWorldScene() *WorldScene {
 			0,
 			1,
 		),
+		player: entities.NewPlayer(
+			entities.WithPosition(playerPos),
+		),
 	}
 }
 
@@ -50,6 +67,7 @@ func (s *WorldScene) Draw() {
 	rl.BeginMode2D(s.camera)
 
 	s.tileGrid.Draw()
+	s.player.Draw()
 	s.drawTileTooltip()
 
 	rl.EndMode2D()
@@ -134,7 +152,6 @@ func (s *WorldScene) drawTileTooltip() {
 }
 
 func (s *WorldScene) moveCamera(dt float32) {
-	log.Println("s.camera.Offset :>> ", s.camera.Offset)
 	if rl.IsKeyDown(rl.KeyA) {
 		s.camera.Offset.X += cameraSpeed * dt
 	}
