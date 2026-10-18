@@ -12,7 +12,7 @@ func main() {
 		blockTexture := engine.SetTexture2D("blocks", "assets/sprites/blocks.png")
 		rl.SetTextureFilter(blockTexture, rl.FilterPoint)
 
-		playerTexture := engine.SetTexture2D("player", "assets/sprites/player-space-idle.png")
+		playerTexture := engine.SetTexture2D("player", "assets/sprites/player-space-idle-32.png")
 		rl.SetTextureFilter(playerTexture, rl.FilterPoint)
 
 		g.SetActiveScene(scenes.NewWorldScene())

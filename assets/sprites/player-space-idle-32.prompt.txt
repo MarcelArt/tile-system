@@ -1,0 +1,11 @@
+Generated using built-in image_gen, then trimmed and exported to a 32x32 transparent canvas using ImageMagick nearest-neighbor scaling.
+Reference: player-space-idle.png.
+
+Use case: style-transfer
+Asset type: single 32x32 pixel playable character sprite.
+Input images: Image 1 is the character edit target.
+Primary request: Redesign this same space colonist to fit entirely within ONE SQUARE 32x32-pixel tile, the same height as a terrain block. Actual logical pixel grid must be 32 columns by 32 rows. Show the sprite enlarged as a square canvas with each logical pixel a large uniform square, like nearest neighbor enlargement of a true 32x32 sprite. Simplify aggressively for that tiny resolution, do not render a detailed illustration.
+Keep: right-facing side-view idle stance, friendly face with dark brown hair visible through a round helmet, ivory pressure suit, orange accents, charcoal joints/gloves/boots, compact oxygen backpack.
+Change: much simpler compact chibi proportions, large helmet and short body/legs, silhouette about 20 logical pixels wide and 32 pixels tall. Helmet top touches canvas top row and boot soles touch bottom row, all limbs and backpack fit inside canvas. Character centered horizontally with transparent side margins. Feet share a flat baseline. No clipping.
+Style: authentic low-resolution pixel art with exactly square aligned blocks, limited palette, flat 2-3 tone shading, chunky one-logical-pixel dark outline, one-pixel eye, clean readable forms at 32x32. One pixel grid throughout. Omit intricate folds, hoses, buckles and fine texture. No antialiasing or gradients.
+Background: genuinely transparent alpha. No brown haze, glow, halo, cast shadow, floor, backdrop, checkerboard, text, gridlines or extra characters. Exactly one full body sprite on square canvas.

@@ -139,19 +139,24 @@ func (e *TileGrid) IsSolid(x, y int32) bool {
 	return tile.Block.State == data.StateSolid
 }
 
-func (e *TileGrid) OverlapsSolid(box rl.Rectangle) bool {
-	x0, y0 := e.WorldToTileCoord(rl.NewVector2(box.X, box.Y))
-	x1, y1 := e.WorldToTileCoord(rl.NewVector2(box.X+box.Width, box.Y+box.Height))
-	for x := x0; x <= x1; x++ {
-		for y := y0; y <= y1; y++ {
-			if e.IsSolid(x, y) {
-				return true
-			}
-		}
-	}
-	return false
-
+func (e *TileGrid) CollisionRect(x, y int32) rl.Rectangle {
+	worldX, worldY := e.TileToWorldPoint(x, y)
+	return rl.NewRectangle(float32(worldX), float32(worldY), float32(e.TileSize), float32(e.TileSize))
 }
+
+// func (e *TileGrid) OverlapsSolid(box rl.Rectangle) bool {
+// 	x0, y0 := e.WorldToTileCoord(rl.NewVector2(box.X, box.Y))
+// 	x1, y1 := e.WorldToTileCoord(rl.NewVector2(box.X+box.Width, box.Y+box.Height))
+// 	for x := x0; x <= x1; x++ {
+// 		for y := y0; y <= y1; y++ {
+// 			if e.IsSolid(x, y) {
+// 				return true
+// 			}
+// 		}
+// 	}
+// 	return false
+
+// }
 
 func (e *TileGrid) heatTransfer(dt float32) {
 	w := e.Tiles.GetW()

@@ -25,7 +25,7 @@ type WorldScene struct {
 func NewWorldScene() *WorldScene {
 	tileSystem := entities.NewTileSystem(
 		// entities.WithOffset(rl.NewVector2(4, 4)),
-		entities.WithTileSize(32),
+		entities.WithTileSize(64),
 		entities.WithWidthAndHeight(64, 44),
 	)
 	tileSystem.Generate()
@@ -34,7 +34,7 @@ func NewWorldScene() *WorldScene {
 	x := tileSystem.Tiles.GetW() / 2
 	var playerPos rl.Vector2
 	for y := range h {
-		tile, _ := tileSystem.Tiles.Get(x, y+2)
+		tile, _ := tileSystem.Tiles.Get(x, y+1)
 		if tile.Block.ID != data.BlockVacuum {
 			playerX, playerY := tileSystem.TileToWorldPoint(x, y)
 			playerPos.X = float32(playerX)
@@ -57,7 +57,7 @@ func NewWorldScene() *WorldScene {
 		),
 		player: entities.NewPlayer(
 			entities.WithPlayerPosition(playerPos),
-			entities.WithPlayerWidthAndHeight(32, 64),
+			entities.WithPlayerWidthAndHeight(64, 64),
 		),
 	}
 }
@@ -70,6 +70,8 @@ func (s *WorldScene) Draw() {
 	s.tileGrid.Draw()
 	s.player.Draw()
 	s.drawTileTooltip()
+
+	s.collisionDebug()
 
 	rl.EndMode2D()
 }
@@ -176,6 +178,51 @@ func (s *WorldScene) clampCamera() {
 
 	s.camera.Offset.X = rl.Clamp(s.camera.Offset.X, float32(screenW)-worldW, 0)
 	s.camera.Offset.Y = rl.Clamp(s.camera.Offset.Y, float32(screenH)-worldH, 0)
+}
+
+// func (s *WorldScene) checkCollisions() {
+// 	playerCol := s.player.CollisionRect()
+// 	x0, y0 := s.tileGrid.WorldToTileCoord(rl.NewVector2(playerCol.X, playerCol.Y))
+// 	x1, y1 := s.tileGrid.WorldToTileCoord(rl.NewVector2(playerCol.X+playerCol.Width, playerCol.Y+playerCol.Height))
+
+// }
+
+func (s *WorldScene) collisionDebug() {
+	playerCol := s.player.CollisionRect()
+
+	playerX, playerY := s.tileGrid.WorldToTileCoord(rl.NewVector2(playerCol.X, playerCol.Y))
+	nwRect := s.tileGrid.CollisionRect(playerX-1, playerY-1)
+	nRect := s.tileGrid.CollisionRect(playerX, playerY-1)
+	neRect := s.tileGrid.CollisionRect(playerX+1, playerY-1)
+
+	wRect := s.tileGrid.CollisionRect(playerX-1, playerY)
+	eRect := s.tileGrid.CollisionRect(playerX+1, playerY)
+
+	swRect := s.tileGrid.CollisionRect(playerX-1, playerY+1)
+	sRect := s.tileGrid.CollisionRect(playerX, playerY+1)
+	seRect := s.tileGrid.CollisionRect(playerX+1, playerY+1)
+
+	// x0, y0 := s.tileGrid.WorldToTileCoord(rl.NewVector2(playerCol.X, playerCol.Y))
+	// x1, y1 := s.tileGrid.WorldToTileCoord(rl.NewVector2(playerCol.X+playerCol.Width, playerCol.Y+playerCol.Height))
+
+	// nwRect := s.tileGrid.CollisionRect(x0, y0)
+	// seRect := s.tileGrid.CollisionRect(x1, y1)
+
+	// log.Println("nwRect :>> ", nwRect)
+	// log.Println("seRect :>> ", seRect)
+
+	rl.DrawRectangleLinesEx(nwRect, 1, rl.Red)
+	rl.DrawRectangleLinesEx(nRect, 1, rl.Red)
+	rl.DrawRectangleLinesEx(neRect, 1, rl.Red)
+
+	rl.DrawRectangleLinesEx(wRect, 1, rl.Red)
+	rl.DrawRectangleLinesEx(eRect, 1, rl.Red)
+
+	rl.DrawRectangleLinesEx(swRect, 1, rl.Red)
+	rl.DrawRectangleLinesEx(sRect, 1, rl.Red)
+	rl.DrawRectangleLinesEx(seRect, 1, rl.Red)
+
+	s.player.CollisionDebug()
 }
 
 var _ engine.IScene = &WorldScene{}
