@@ -5,6 +5,14 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+type BlockState uint
+
+const (
+	StateGas BlockState = iota
+	StateLiquid
+	StateSolid
+)
+
 type Block struct {
 	_ no.Copy
 
@@ -15,6 +23,7 @@ type Block struct {
 	Modifier             float32
 	Color                rl.Color
 	BaseMass             float32
+	State                BlockState
 }
 
 func (d *Block) TextureSource() rl.Rectangle {
@@ -46,6 +55,7 @@ var Blocks = map[BlockID]*Block{
 		Modifier:             0,
 		Color:                rl.NewColor(0, 0, 0, 255),
 		BaseMass:             0,
+		State:                StateGas,
 	},
 	BlockDirt: {
 		ID:                   BlockDirt,
@@ -55,6 +65,7 @@ var Blocks = map[BlockID]*Block{
 		Modifier:             1,
 		Color:                rl.NewColor(139, 69, 19, 255),
 		BaseMass:             500,
+		State:                StateSolid,
 	},
 	BlockSandstone: {
 		ID:                   BlockSandstone,
@@ -64,6 +75,7 @@ var Blocks = map[BlockID]*Block{
 		Modifier:             1,
 		Color:                rl.NewColor(210, 180, 140, 255),
 		BaseMass:             800,
+		State:                StateSolid,
 	},
 	BlockCopperOre: {
 		ID:                   BlockCopperOre,
@@ -73,6 +85,7 @@ var Blocks = map[BlockID]*Block{
 		Modifier:             1,
 		Color:                rl.NewColor(184, 115, 51, 255),
 		BaseMass:             400,
+		State:                StateSolid,
 	},
 }
 

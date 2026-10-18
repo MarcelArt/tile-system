@@ -56,7 +56,8 @@ func NewWorldScene() *WorldScene {
 			1,
 		),
 		player: entities.NewPlayer(
-			entities.WithPosition(playerPos),
+			entities.WithPlayerPosition(playerPos),
+			entities.WithPlayerWidthAndHeight(32, 64),
 		),
 	}
 }
@@ -84,6 +85,7 @@ func (s *WorldScene) Update() engine.SceneResult {
 
 	dt := rl.GetFrameTime()
 	s.tileGrid.Update(dt, s.camera)
+	s.player.Update(dt, s.tileGrid)
 	s.moveCamera(dt)
 
 	if s.tickCounter >= defaultTickRate {

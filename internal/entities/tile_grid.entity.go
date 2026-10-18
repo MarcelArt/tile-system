@@ -130,6 +130,29 @@ func (e *TileGrid) WorldPixelSize() (float32, float32) {
 	return float32(e.Tiles.GetW() * e.TileSize), float32(e.Tiles.GetH() * e.TileSize)
 }
 
+func (e *TileGrid) IsSolid(x, y int32) bool {
+	tile, err := e.Tiles.Get(x, y)
+	if err != nil {
+		return true
+	}
+
+	return tile.Block.State == data.StateSolid
+}
+
+func (e *TileGrid) OverlapsSolid(box rl.Rectangle) bool {
+	x0, y0 := e.WorldToTileCoord(rl.NewVector2(box.X, box.Y))
+	x1, y1 := e.WorldToTileCoord(rl.NewVector2(box.X+box.Width, box.Y+box.Height))
+	for x := x0; x <= x1; x++ {
+		for y := y0; y <= y1; y++ {
+			if e.IsSolid(x, y) {
+				return true
+			}
+		}
+	}
+	return false
+
+}
+
 func (e *TileGrid) heatTransfer(dt float32) {
 	w := e.Tiles.GetW()
 	h := e.Tiles.GetH()
